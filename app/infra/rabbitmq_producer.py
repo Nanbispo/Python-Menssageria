@@ -21,8 +21,8 @@ class RabbitMQProducer:
             self.exchange = await self.channel.declare_exchange(
                 EXCHANGE_NAME, aio_pika.ExchangeType.DIRECT, durable=True
             )
-            await self.channel.declare_queue(QUEUE_NAME, durable=True)
-            await self.exchange.bind(QUEUE_NAME, routing_key=QUEUE_NAME)
+            queue = await self.channel.declare_queue(QUEUE_NAME, durable=True)
+            await queue.bind(QUEUE_NAME, routing_key=QUEUE_NAME)
 
     async def publish_payment_request (
         self, 
@@ -40,7 +40,7 @@ class RabbitMQProducer:
 
         await self.exchange.publish(
             aio_pika.Message(
-                body=json.dumps(message_body).encode()
+                body=json.dumps(message_body).encode(),
                 delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
             ),
              routing_key=QUEUE_NAME,
